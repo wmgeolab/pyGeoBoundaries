@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "pygeoboundaries"
+version = "0.0.1"
+description = ""
+authors = ["rohith4444 <rohithreddy24242@gmail.com>", "DanRunfola <danr@wm.edu>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/wmgeolab/pyGeoBoundaries"
+repository = "https://github.com/wmgeolab/pyGeoBoundaries"
+keywords = ["pygeoboundaries","geoboundaries","wmgeolab","metaCheck"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

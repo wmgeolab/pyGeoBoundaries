@@ -1,4 +1,5 @@
 import os
+import shutil
 import zipfile
 import requests
 import datetime
@@ -29,13 +30,15 @@ isoList1 = countries["Alpha-3code"].tolist()
 licenseList1 = licenses["license_name"].tolist()
 
 
-def loadFile(path):
+def loadFile(path, temp_path=None):
     """
     Load File: Read GeoJSON or Shapefile, or extract and read from a zip file.
 
     Parameters:
     -----------
     path : str : The file path to the GeoJSON, Shapefile, or a zip file containing them.
+    temp_path : str : Optional. The temporary path to extract files from a zip. 
+                    If not provided, it defaults to the directory where the script is located.
 
     Returns:
     --------
@@ -45,13 +48,16 @@ def loadFile(path):
     Usage:
     ------
     >>> from pygeoboundaries import loadFile
-    >>> geom_data = loadFile(path='/path/to/your/file.geojson')
+    >>> geom_data = loadFile(path='/path/to/your/file.geojson', temp_path='/path/to/temp/folder')
     """
+    if temp_path is None:
+        temp_path = os.path.dirname(os.path.abspath(__file__))
+
     # Check if the path is a zip file
     if path.endswith(".zip"):
-        extracted_folder = "temp_extraction_folder"
+        extracted_folder = os.path.join(temp_path, "temp_extraction_folder")
         # Create the extraction folder if it doesn't exist
-        os.makedirs(extracted_folder)
+        os.makedirs(extracted_folder, exist_ok=True)
         # Extract all files from the zip
         with zipfile.ZipFile(path, "r") as zip_ref:
             zip_ref.extractall(extracted_folder)
@@ -81,13 +87,15 @@ def loadFile(path):
         )
 
 
-def metaLoad(path):
+def metaLoad(path, temp_path=None):
     """
     Meta Load: Read metadata from a text file or extract from a zip file.
 
     Parameters:
     -----------
     path : str : The file path to the metadata text file or a zip file containing it.
+    temp_path : str : Optional. The temporary path to extract files from a zip. 
+                    If not provided, it defaults to the directory where the script is located.
 
     Returns:
     --------
@@ -97,35 +105,71 @@ def metaLoad(path):
     Usage:
     ------
     >>> from pygeoboundaries import metaLoad
-    >>> metadata = metaLoad(path='/path/to/your/file.txt')
+    >>> metadata = metaLoad(path='/path/to/your/file.txt', temp_path='/path/to/temp/folder')
     """
+    if temp_path is None:
+        temp_path = os.path.dirname(os.path.abspath(__file__))
+
     # Check if the path is a zip file
     if path.endswith(".zip"):
+        extracted_folder = os.path.join(temp_path, "temp_extraction_folder")
+        # Create the extraction folder if it doesn't exist
+        os.makedirs(extracted_folder, exist_ok=True)
+        # Extract all files from the zip
         with zipfile.ZipFile(path, "r") as zip_ref:
-            # Get a list of file names in the zip file
-            file_names = zip_ref.namelist()
-
-            # Check if there is at least one .geojson or .shp file
-            valid_file = any(name.endswith(".txt") for name in file_names)
-
-            if valid_file:
-                # Extract the first .geojson or .shp file from the zip
-                for name in file_names:
-                    if name.endswith(".txt"):
-                        zip_ref.extract(name, path="temp_extraction_folder")
-                        extracted_path = os.path.join("temp_extraction_folder", name)
-                        with open(extracted_path, "r", encoding="utf-8") as file:
-                            metaData = file.read()
-                            testData = "get on with it"
-                            print(testData)
-                        return testData
-
+            zip_ref.extractall(extracted_folder)
+        # List all extracted files
+        extracted_files = os.listdir(extracted_folder)
+        # Find the first .txt file
+        selected_file = next(
+            (
+                file
+                for file in extracted_files
+                if file.endswith(".txt") 
+            ),
+            None,
+        )
+        if selected_file:
+            # Construct the path to the selected file
+            selected_file_path = os.path.join(extracted_folder, selected_file)
+            with open(selected_file_path, "r", encoding="utf-8") as file:
+                metaData = file.read()
+            return metaData
+        
     elif path.endswith(".txt"):
         with open(path, "r", encoding="utf-8") as file:
             metaData = file.read()
         return metaData
     else:
         raise ValueError("Error: Please give a valid path with .txt extension.")
+
+
+def close(temp_path=None):
+    """
+    Close: Delete the extracted folder.
+
+    Parameters:
+    -----------
+    temp_path : str or None : The temporary path where the files were extracted.
+                             If None, use the default path where the script is located.
+
+    Usage:
+    ------
+    >>> from pygeoboundaries import close
+    >>> close(temp_path='/path/to/temp/folder')  # Specify a custom temporary path
+    >>> close()  # Use the default temporary path
+    """
+    if temp_path is None:
+        # If no temporary path is provided, use the default path where the script is located
+        script_directory = os.path.dirname(os.path.abspath(__file__))
+        temp_path = os.path.join(script_directory, "temp_extraction_folder")
+
+    try:
+        shutil.rmtree(temp_path)
+        print(f"Directory '{temp_path}' removed successfully.")
+    except Exception as e:
+        print(f"An error occurred while deleting the directory '{temp_path}': {e}")
+
 
 
 def nameCheck(path):
@@ -433,38 +477,14 @@ def metaCheck(path):
             else:
                 print("INFO", "No license notes detected.")
 
-        # if("license source" in key.lower()):
-        #     if(len(val.replace(" ","")) > 0):
-        #         if(val.lower() not in ["na", "nan", "null"]):
-        #             print("INFO", "License source detected: " + str(val))
-
-        #             #Check for a png image of the license source.
-        #             #Any png or jpg with the name "license" is accepted.
-        #             licPic = 0
-        #             try:
-        #                 with zipfile.ZipFile(wself.sourcePath) as zFb:
-        #                     licPic = zFb.read('license.png')
-        #             except:
-        #                 pass
-
-        #             try:
-        #                 with zipfile.ZipFile(self.sourcePath) as zFb:
-        #                     licPic = zFb.read('license.jpg')
-        #             except:
-        #                 pass
-
-        #             if(licPic != 0):
-        #                     print("INFO", "License image found.")
-        #                     self.metaReq["licenseImage"] = "Image Available"
-        #             else:
-        #                 print("WARN", "No license image found. We check for license.png and license.jpg.")
-        #                 self.metaReq["licenseImage"] = "None Available"
-        #         else:
-        #             print("CRITICAL", "No license source detected.")
-        #             self.metaReq["licenseImage"] = "ERROR: No license source detected."
-        #     else:
-        #         print("CRITICAL", "No license source detected.")
-        #         self.metaReq["licenseImage"] = "ERROR: No license source detected."
+        if("license source" in key.lower()):
+            if(len(val.replace(" ","")) > 0):
+                if(val.lower() not in ["na", "nan", "null"]):
+                    print("INFO", "License source detected: " + str(val))
+                else:
+                    print("CRITICAL", "No license source detected.")
+            else:
+                print("CRITICAL", "No license source detected.")
 
         if "link to source data" in key.lower():
             if len(val.replace(" ", "")) > 0:
@@ -484,6 +504,44 @@ def metaCheck(path):
             else:
                 print("WARN", "No other notes detected.  This field is optional.")
 
+
+
+def checkLicensePng(path):
+    """
+    Check License PNG: Check for the presence of a license image (PNG or JPG) in a zip file.
+
+    Parameters:
+    -----------
+    path : str : The file path to the zip file.
+
+    Returns:
+    --------
+    None
+
+    Usage:
+    ------
+    >>> from pygeoboundaries import checkLicensePng
+    >>> has_license_image = checkLicensePng('/path/to/your/file.zip')
+    """
+
+    license_extensions = ['.png', '.jpg']
+
+    # Check if the path is a zip file
+    if path.endswith(".zip"):
+        with zipfile.ZipFile(path, "r") as zip_ref:
+            # Get a list of file names in the zip file
+            file_names = zip_ref.namelist()
+
+            # Check if there is any file with .png or .jpg extension
+            for ext in license_extensions:
+                if any(file.lower().endswith(ext) for file in file_names):
+                    print("INFO", f"License image found with extension {ext}.")
+                    return True
+                else:
+                    print("WARN", "No license image found. Checked for license.png and license.jpg.")
+    else:
+        raise ValueError("Error: Please give a valid path with .zip extension.")
+    
 
 def allChecks(path):
     """
@@ -507,9 +565,16 @@ def allChecks(path):
     boundaryCheck(path)
     projectionCheck(path)
     metaCheck(path)
+    checkLicensePng(path)
     print("All checks are passes")
 
 
 # nameCheck("/home/rohith/work/trial/IND_ADM3.zip")
 # metaCheck("/home/rohith/work/trial/AFG_ADM0/meta.txt")
+# loadFile("/home/rohith/work/trial/IND_ADM3.zip","/home/rohith/work/trial/")
+# metaLoad("/home/rohith/work/trial/IND_ADM3.zip","/home/rohith/work/trial/")
+# close("/home/rohith/work/trial/temp_extraction_folder")
+# close()
+# loadFile("/home/rohith/work/trial/IND_ADM3.zip")
 metaLoad("/home/rohith/work/trial/IND_ADM3.zip")
+# checkLicensePng("/home/rohith/work/trial/IND_ADM3.zip")

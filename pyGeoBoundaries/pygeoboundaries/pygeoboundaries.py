@@ -172,20 +172,22 @@ def close(temp_path=None):
 
 
 
-def nameCheck(path):
+def nameCheck(path, temp_path=None):
     """
     Name Check: Check for the presence of a column containing names in the provided GeoDataFrame.
 
     Parameters:
     -----------
-    path : str : The file path to the GeoJSON or Shapefile or zipfile.
+    path : str : The file path to the GeoJSON, Shapefile, or zipfile.
+    temp_path : str, optional : The path where the zip content will be extracted. If not provided, defaults to None.
 
     Usage:
     ------
     >>> from pygeoboundaries import nameCheck
-    >>> nameCheck(path='/path/to/your/file.geojson')
+    >>> nameCheck(path='/path/to/your/file.geojson', temp_path='/path/to/your/extract/folder')
     """
-    geomData = loadFile(path)
+
+    geomData = loadFile(path, temp_path=temp_path)
     nameC = set(
         ["Name", "name", "NAME", "shapeName", "shapename", "SHAPENAME", "MAX_Name"]
     )
@@ -208,20 +210,21 @@ def nameCheck(path):
             )
 
 
-def isoCheck(path):
+def isoCheck(path, temp_path=None):
     """
     ISO Check: Check for the presence of a column containing ISO codes in the provided GeoDataFrame.
 
     Parameters:
     -----------
     path : str : The file path to the GeoJSON or Shapefile or zipfile.
+    temp_path : str, optional : The path where the zip content will be extracted. If not provided, defaults to None.
 
     Usage:
     ------
     >>> from pygeoboundaries import isoCheck
-    >>> isoCheck(path='/path/to/your/file.geojson')
+    >>> isoCheck(path='/path/to/your/file.geojson', temp_path='/path/to/your/extract/folder')
     """
-    geomData = loadFile(path)
+    geomData = loadFile(path, temp_path=temp_path)
     nameC = set(
         [
             "ISO",
@@ -253,20 +256,21 @@ def isoCheck(path):
             )
 
 
-def boundaryCheck(path):
+def boundaryCheck(path, temp_path=None):
     """
     Boundary Check: Check for valid geometries and whether they extend past the boundaries of the Earth.
 
     Parameters:
     -----------
     path : str : The file path to the GeoJSON or Shapefile or zipfile.
+    temp_path : str, optional : The path where the zip content will be extracted. If not provided, defaults to None.
 
     Usage:
     ------
     >>> from pygeoboundaries import boundaryCheck
-    >>> boundaryCheck(path='/path/to/your/file.geojson')
+    >>> boundaryCheck(path='/path/to/your/file.geojson', temp_path='/path/to/your/extract/folder')
     """
-    geomData = loadFile(path)
+    geomData = loadFile(path, temp_path=temp_path)
     for index, row in geomData.iterrows():
         xmin = row["geometry"].bounds[0]
         ymin = row["geometry"].bounds[1]
@@ -304,20 +308,21 @@ def boundaryCheck(path):
                 )
 
 
-def projectionCheck(path):
+def projectionCheck(path, temp_path=None):
     """
     Projection Check: Check if the geometry data has the required EPSG 4326 projection.
 
     Parameters:
     -----------
     path : str : The file path to the GeoJSON or Shapefile or zipfile.
+    temp_path : str, optional : The path where the zip content will be extracted. If not provided, defaults to None.
 
     Usage:
     ------
     >>> from pygeoboundaries import projectionCheck
-    >>> projectionCheck(path='/path/to/your/file.geojson')
+    >>> projectionCheck(path='/path/to/your/file.geojson', temp_path='/path/to/your/extract/folder')
     """
-    geomData = loadFile(path)
+    geomData = loadFile(path, temp_path=temp_path)
     if geomData.crs == "epsg:4326":
         print("INFO", "Projection confirmed as " + str(geomData.crs))
     else:
@@ -328,13 +333,14 @@ def projectionCheck(path):
         )
 
 
-def metaCheck(path):
+def metaCheck(path, temp_path=None):
     """
     Meta Check: Validate metadata information from a text file.
 
     Parameters:
     -----------
     path : str : The file path to the metadata text file or zipfile that contains meta file.
+    temp_path : str, optional : The path where the zip content will be extracted. If not provided, defaults to None.
 
     Returns:
     --------
@@ -343,9 +349,9 @@ def metaCheck(path):
     Usage:
     ------
     >>> from pygeoboundaries import metaCheck
-    >>> metaCheck(path='/path/to/your/meta.txt')
+    >>> metaCheck(path='/path/to/your/meta.txt', temp_path='/path/to/your/extract/folder')
     """
-    metaData = metaLoad(path)
+    metaData = metaLoad(path, temp_path=temp_path)
     print("INFO", "Beginning meta.txt validity checks.")
 
     for m in metaData.splitlines():
@@ -543,13 +549,14 @@ def checkLicensePng(path):
         raise ValueError("Error: Please give a valid path with .zip extension.")
     
 
-def allChecks(path):
+def allChecks(path, temp_path=None):
     """
     Perform all checks on the given file path.
 
     Parameters:
     -----------
     path : str : The file path to the data file.
+    temp_path : str, optional : The path where the zip content will be extracted. If not provided, defaults to None.
 
     Returns:
     --------
@@ -558,14 +565,14 @@ def allChecks(path):
     Usage:
     ------
     >>> from pygeoboundaries import allChecks
-    >>> allChecks(path='/path/to/your/datafile')
+    >>> allChecks(path='/path/to/your/datafile', temp_path='/path/to/your/extract/folder')
     """
-    nameCheck(path)
-    isoCheck(path)
-    boundaryCheck(path)
-    projectionCheck(path)
-    metaCheck(path)
-    checkLicensePng(path)
+    nameCheck(path, temp_path=temp_path)
+    isoCheck(path, temp_path=temp_path)
+    boundaryCheck(path, temp_path=temp_path)
+    projectionCheck(path, temp_path=temp_path)
+    metaCheck(path, temp_path=temp_path)
+    checkLicensePng(path, temp_path=temp_path)
     print("All checks are passes")
 
 

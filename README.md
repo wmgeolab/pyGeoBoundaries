@@ -1,9 +1,6 @@
 # pyGeoBoundaries
 
-This is a python pacakage for performing the checks on geoboundary files.
-
-### Purpose of the package
-+ The purpose of package is to provide a collection of data checks and file validating for the pull requests created to the geoBoundaries repository.
++ pyGeoBoundaries is a Python package designed for performing data checks and file validation on geoboundary files. The primary purpose of this package is to facilitate the review process for pull requests made to the geoBoundaries repository.
 
 ### Features
 + Collection of checks
@@ -17,7 +14,7 @@ This is a python pacakage for performing the checks on geoboundary files.
 
 ### Getting Started
 
-The package can be found on pypi hence you can install it using pip
+You can find the package on PyPI, making it easily installable using pip.
 
 #### Installation
 ```bash
@@ -26,7 +23,7 @@ pip install pyGeoBoundaries
 
 ### Usage
 
-Using the methods.
+Utilize the provided methods for performing various checks on your geoboundary files.
 
 ```bash
 from pyGeoBoundaries import nameCheck
@@ -35,9 +32,9 @@ nameCheck("path to your file)
 
 ### Contribution
 
-Contributions are welcome Notice a bug let us know. Thanks
+Contributions to the project are welcomed. If you notice any bugs or have suggestions for improvements, feel free to let us know. Thank you for your contributions!
 
 ### Author
 
-Dan Miller Runfola
-Rohith Reddy Mandala
++ Dan Miller Runfola
++ Rohith Reddy Mandala

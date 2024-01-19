@@ -28,7 +28,7 @@ Utilize the provided methods for performing various checks on your geoboundary f
 
 ```bash
 from pygeoboundaries import nameCheck
-nameCheck("path to your file)
+nameCheck("path to your file", "temporay path to extract zip file which is optional")
 ```
 
 ### Contribution

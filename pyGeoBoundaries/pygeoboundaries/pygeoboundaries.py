@@ -61,6 +61,8 @@ def loadFile(path, temp_path=None):
         # Extract all files from the zip
         with zipfile.ZipFile(path, "r") as zip_ref:
             zip_ref.extractall(extracted_folder)
+        # Get the filename without extension
+        filename_without_extension = os.path.splitext(os.path.basename(path))[0]
         # List all extracted files
         extracted_files = os.listdir(extracted_folder)
         # Find the first .geojson or .shp file
@@ -68,19 +70,22 @@ def loadFile(path, temp_path=None):
             (
                 file
                 for file in extracted_files
-                if file.endswith(".geojson") or file.endswith(".shp")
+                if filename_without_extension in file and (
+                file.endswith(".shp") or file.endswith(".geojson"))
             ),
             None,
         )
         if selected_file:
             # Construct the path to the selected file
             selected_file_path = os.path.join(extracted_folder, selected_file)
+            print(selected_file_path)
             geom_data = gpd.read_file(selected_file_path)
             return geom_data
 
     elif path.endswith(".geojson") or path.endswith(".shp"):
         # If the path directly points to a .geojson or .shp file, read it using GeoPandas
-        return gpd.read_file(path)
+        geomData=gpd.read_file(path)
+        return geomData
     else:
         raise ValueError(
             "Error: Please give a valid path with either .geojson, .shp extension, or a zip file containing them."
@@ -112,7 +117,9 @@ def metaLoad(path, temp_path=None):
 
     # Check if the path is a zip file
     if path.endswith(".zip"):
-        extracted_folder = os.path.join(temp_path, "temp_extraction_folder")
+        # Get the filename without extension
+        filename_without_extension = os.path.splitext(os.path.basename(path))[0]
+        extracted_folder = os.path.join(temp_path, "temp_extraction_folder/temp_extraction_folder"+filename_without_extension)
         # Create the extraction folder if it doesn't exist
         os.makedirs(extracted_folder, exist_ok=True)
         # Extract all files from the zip
@@ -208,6 +215,8 @@ def nameCheck(path, temp_path=None):
             print(
                 "WARN", "No name values were found, even though a column was present."
             )
+    else:
+        print("WARN","No column for boundary Names found. ")
 
 
 def isoCheck(path, temp_path=None):
@@ -254,6 +263,8 @@ def isoCheck(path, temp_path=None):
             print(
                 "WARN", "No ISOs values were found, even though a column was present."
             )
+    else:
+        print("WARN","No column for boundary ISOs found. ")
 
 
 def boundaryCheck(path, temp_path=None):
@@ -567,21 +578,13 @@ def allChecks(path, temp_path=None):
     >>> from pygeoboundaries import allChecks
     >>> allChecks(path='/path/to/your/datafile', temp_path='/path/to/your/extract/folder')
     """
-    nameCheck(path, temp_path=temp_path)
-    isoCheck(path, temp_path=temp_path)
-    boundaryCheck(path, temp_path=temp_path)
-    projectionCheck(path, temp_path=temp_path)
-    metaCheck(path, temp_path=temp_path)
-    checkLicensePng(path, temp_path=temp_path)
-    print("All checks are passes")
-
-
-# nameCheck("/home/rohith/work/trial/IND_ADM3.zip")
-# metaCheck("/home/rohith/work/trial/AFG_ADM0/meta.txt")
-# loadFile("/home/rohith/work/trial/IND_ADM3.zip","/home/rohith/work/trial/")
-# metaLoad("/home/rohith/work/trial/IND_ADM3.zip","/home/rohith/work/trial/")
-# close("/home/rohith/work/trial/temp_extraction_folder")
-# close()
-# loadFile("/home/rohith/work/trial/IND_ADM3.zip")
-metaLoad("/home/rohith/work/trial/IND_ADM3.zip")
-# checkLicensePng("/home/rohith/work/trial/IND_ADM3.zip")
+    if path.endswith(".zip"):
+        nameCheck(path, temp_path=temp_path)
+        isoCheck(path, temp_path=temp_path)
+        boundaryCheck(path, temp_path=temp_path)
+        projectionCheck(path, temp_path=temp_path)
+        metaCheck(path, temp_path=temp_path)
+        checkLicensePng(path)
+        print("Performed all the checks.")
+    else:
+        print("Please provide the zip file which contains geojson or shp files and text file.")

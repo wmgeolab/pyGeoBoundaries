@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pygeoboundaries"
-version = "0.0.1"
+version = "0.0.2"
 description = "For performing data checks and file validation on geoboundary files. The primary purpose of this package is to facilitate the review process for pull requests made to the geoBoundaries repository."
 authors = ["rohith4444 <rohithreddy24242@gmail.com>", "DanRunfola <danr@wm.edu>"]
 readme = "README.md"

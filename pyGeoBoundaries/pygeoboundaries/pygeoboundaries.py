@@ -234,7 +234,7 @@ def isoCheck(path, temp_path=None):
     >>> isoCheck(path='/path/to/your/file.geojson', temp_path='/path/to/your/extract/folder')
     """
     geomData = loadFile(path, temp_path=temp_path)
-    nameC = set(
+    isoC = set(
         [
             "ISO",
             "ISO_code",
@@ -246,18 +246,18 @@ def isoCheck(path, temp_path=None):
             "MAX_ISO_Co",
         ]
     )
-    nameCol = list(nameC & set(geomData.columns))
-    if len(nameCol) == 1:
-        print("INFO", "Column for ISO detected: " + str(nameCol[0]))
+    isoCol = list(isoC & set(geomData.columns))
+    if len(isoCol) == 1:
+        print("INFO", "Column for ISO detected: " + str(isoCol[0]))
         try:
-            nameExample = geomData[str(nameCol[0])][0]
-            nameValues = (
-                geomData[geomData[str(nameCol[0])].str.contains(".*", regex=True)][
-                    str(nameCol[0])
+            isoExample = geomData[str(isoCol[0])][0]
+            isoValues = (
+                geomData[geomData[str(isoCol[0])].str.contains(".*", regex=True)][
+                    str(isoCol[0])
                 ]
             ).count()
             print(
-                "INFO", "ISOs: " + str(nameValues) + " | Example: " + str(nameExample)
+                "INFO", "ISOs: " + str(isoValues) + " | Example: " + str(isoExample)
             )
         except Exception as e:
             print(
